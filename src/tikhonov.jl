@@ -47,28 +47,23 @@ end
 
 to_standard_form(Ψ::RegularizationProblem, b::AbstractVector) = Ψ.Hqᵀ * b
 
-to_standard_form(Ψ::RegularizationProblem, b::AbstractVector, bᵢ::AbstractVector) = 
+to_standard_form(Ψ::RegularizationProblem, b::AbstractVector, bᵢ::AbstractVector) =
     Ψ.Hqᵀ * b, L * bᵢ
 
-to_general_form(Ψ::RegularizationProblem, b::AbstractVector, x̄::AbstractVector) = 
+to_general_form(Ψ::RegularizationProblem, b::AbstractVector, x̄::AbstractVector) =
     Ψ.L⁺ * x̄ + Ψ.K0 * Ψ.T0^(-1) * Ψ.H0ᵀ * (b - Ψ.A * Ψ.L⁺ * x̄)
 
-solve(Ψ::RegularizationProblem, b̄::AbstractVector, λ::AbstractFloat) = 
+solve(Ψ::RegularizationProblem, b̄::AbstractVector, λ::AbstractFloat) =
     cholesky!(Hermitian(zot(Ψ.ĀĀ, λ^2.0))) \ (Ψ.Ā' * b̄)
 
-solve(Ψ::RegularizationProblem, b̄::AbstractVector, x̄₀::AbstractVector, λ::AbstractFloat) = 
+solve(Ψ::RegularizationProblem, b̄::AbstractVector, x̄₀::AbstractVector, λ::AbstractFloat) =
     cholesky!(Hermitian(zot(Ψ.ĀĀ, λ^2.0))) \ (Ψ.Ā' * b̄ + λ^2.0 * x̄₀)
 
 setupRegularizationProblem(A::AbstractMatrix, b::AbstractVector, order::Int) =
     setupRegularizationProblem(A, b, zeros(length(b)), order)
 
-function setupRegularizationProblem(
-    A::AbstractMatrix,
-    b::AbstractVector,
-    x₀::AbstractVector,
-    order::Int,
-)
-    L = Γ(A, order)             
+function setupRegularizationProblem(A::AbstractMatrix, order::Int)
+    L = Γ(A, order)
     n, p = size(L')
     L⁺ = (L' * L)^(-1) * L'
     K, R = qr(L')
@@ -82,5 +77,20 @@ function setupRegularizationProblem(
     Iₙ = Matrix{Float64}(I, n, n) # Make sparse?
     Iₚ = Matrix{Float64}(I, p, p)
 
-    RegularizationProblem(Ā, A, L, Ā'Ā, Ā', svd(Ā), Iₙ, Iₚ, L⁺, Hqᵀ, H0ᵀ, T0, K0, order)
+    RegularizationProblem(
+        Ā,
+        A,
+        L,
+        Ā'Ā,
+        Ā',
+        svd(Ā),
+        Iₙ,
+        Iₚ,
+        L⁺,
+        Hqᵀ,
+        H0ᵀ,
+        T0,
+        K0,
+        order,
+    )
 end
