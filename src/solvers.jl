@@ -111,20 +111,23 @@ end
 
 setupRegularizationProblem(A::AbstractMatrix, order::Int) = 
     setupRegularizationProblem(A, Γ(A, order))
-
+#LinearAlgebra.QRCompactWYQ{Float64,Array{Float64,2}}:
 function setupRegularizationProblem(A::AbstractMatrix, L::AbstractMatrix)
     n, p = size(L')
-    L⁺ = (L' * L)^(-1) * L'
-    K, R = qr(L')
-    Kp = K[:, 1:n]
-    K0 = K[:, n]
-    H, T = qr(A * K0)
-    H0ᵀ = (H[:, 1])'
-    Hqᵀ = (H[:, 1:end])'
-    T0 = T
-    Ā = Hqᵀ * A * L⁺
-    Iₙ = Matrix{Float64}(I, n, n) # Make sparse?
+    Iₙ = Matrix{Float64}(I, n, n) 
     Iₚ = Matrix{Float64}(I, p, p)
+    L⁺ = convert(Matrix, (L' * L)^(-1) * L')
+    K, R = qr(L')
+    K = convert(Matrix,K)
+    Kp = convert(Matrix,(view(K,:,1:n)))
+    K0 = convert(Vector, (view(K,:,n)))
+    tmp=fill(0.0,n);
+    H, T = qr(hcat(A * K0))
+    H = H*Iₙ
+    H0ᵀ = convert(Matrix,(view(H,:,1))')
+    Hqᵀ = convert(Matrix,(view(H, :, 1:n))')
+    T0 = T
+    Ā = Hqᵀ[:,:] * A * L⁺
 
     RegularizationProblem(
         Ā,
