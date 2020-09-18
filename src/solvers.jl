@@ -55,15 +55,64 @@ to_general_form(Ψ::RegularizationProblem, b::AbstractVector, x̄::AbstractVecto
 
 solve(Ψ::RegularizationProblem, b̄::AbstractVector, λ::AbstractFloat) =
     cholesky!(Hermitian(zot(Ψ.ĀĀ, λ^2.0))) \ (Ψ.Ā' * b̄)
-
+   
 solve(Ψ::RegularizationProblem, b̄::AbstractVector, x̄₀::AbstractVector, λ::AbstractFloat) =
     cholesky!(Hermitian(zot(Ψ.ĀĀ, λ^2.0))) \ (Ψ.Ā' * b̄ + λ^2.0 * x̄₀)
 
-setupRegularizationProblem(A::AbstractMatrix, b::AbstractVector, order::Int) =
-    setupRegularizationProblem(A, b, zeros(length(b)), order)
+function solve(
+    Ψ::RegularizationProblem,
+    b::AbstractVector;
+    alg = :gcv_tr,
+    λ₁ = 0.0001,
+    λ₂ = 1000.0,
+)
+    b̄ = @>> b to_standard_form(Ψ)
+    L1, L2, κ = Lcurve_functions(Ψ, b̄)
 
-function setupRegularizationProblem(A::AbstractMatrix, order::Int)
-    L = Γ(A, order)
+    solution = @match alg begin
+        :gcv_tr  => @_ optimize(gcv_tr(Ψ, b̄, _), λ₁, λ₂) 
+        :gcv_svd => @_ optimize(gcv_svd(Ψ, b̄, _), λ₁, λ₂) 
+        :L_curve => @_ optimize(1.0 - κ(_), λ₁, λ₂) 
+        _ => throw("Unknown algorithm, use :gcv_tr, :gcv_svd, or :L_curve")
+    end
+
+    λ = @> solution Optim.minimizer
+    x̄ = solve(Ψ, b̄, λ)
+    x = @>> x̄ to_general_form(Ψ, b) 
+     
+    return RegularizationSolution(x, λ, solution)
+end
+
+function solve(
+    Ψ::RegularizationProblem,
+    b::AbstractVector,
+    x₀::AbstractVector;
+    alg = :L_curve,
+    λ₁ = 0.0001,
+    λ₂ = 1000.0,
+)
+    b̄ = @>> b to_standard_form(Ψ)
+    x̄₀ = Ψ.L * x₀
+    L1, L2, κ = Lcurve_functions(Ψ, b̄, x̄₀)
+
+    solution = @match alg begin
+        :gcv_tr  => @_ optimize(gcv_tr(Ψ, b̄, x̄₀, _), λ₁, λ₂) 
+        :gcv_svd => @_ optimize(gcv_svd(Ψ, b̄, x̄₀, _), λ₁, λ₂)
+        :L_curve => @_ optimize(1.0 - κ(_), λ₁, λ₂) 
+        _ => throw("Unknown algorithm, use :gcv_tr, :gcv_svd, or :L_curve")
+    end
+
+    λ = @> solution Optim.minimizer
+    x̄ = solve(Ψ, b̄, λ)
+    x = @>> x̄ to_general_form(Ψ, b)   
+
+    return RegularizationSolution(x, λ, solution)
+end
+
+setupRegularizationProblem(A::AbstractMatrix, order::Int) = 
+    setupRegularizationProblem(A, Γ(A, order))
+
+function setupRegularizationProblem(A::AbstractMatrix, L::AbstractMatrix)
     n, p = size(L')
     L⁺ = (L' * L)^(-1) * L'
     K, R = qr(L')
@@ -91,6 +140,5 @@ function setupRegularizationProblem(A::AbstractMatrix, order::Int)
         H0ᵀ,
         T0,
         K0,
-        order,
     )
 end

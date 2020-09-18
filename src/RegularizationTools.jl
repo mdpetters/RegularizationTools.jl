@@ -2,7 +2,8 @@ module RegularizationTools
 
 using LinearAlgebra
 using MLStyle
-using Pipe
+using Lazy
+using Underscores
 using Optim
 using Calculus
 
@@ -11,14 +12,8 @@ export setupRegularizationProblem,
     to_standard_form,
     to_general_form,
     gcv_tr,
-    gcv_svd
-
-
-# b̄::Vector{Float64}     # Standard form of measured quantities
-# x̄₀::Vector{Float64}    # Standard form a-priori estimate of x (p)
-# b::Vector{Float64}     # General form of measured quantitites (p)
-# x₀::Vector{Float64}    # General form of a-priori estimate of x (p)
-# intital_guess::Bool    # Initial guess provides (true/false)
+    gcv_svd,
+    Lcurve_functions
 
 struct RegularizationProblem
     Ā::Matrix{Float64}     # Standard form of design matrix
@@ -34,12 +29,15 @@ struct RegularizationProblem
     H0ᵀ::Matrix{Float64}   # Cached H0' (standard-form conversion)
     T0::Matrix{Float64}    # Cached T0  (standard-form conversion)
     K0::Vector{Float64}    # Cached K0  (standard-form conversion)
-    order::Int             # Order of Tikhonov smoothing matrix (0, 1, or 2)
 end
 
-clean(x) = map(x -> x < 0.0 ? 0.0 : x, x)
+struct RegularizationSolution
+    x::AbstractVector
+    λ::AbstractFloat
+    solution::Optim.UnivariateOptimizationResults
+end
 
-include("tikhonov.jl")
-include("optimization.jl")
+include("solvers.jl")
+include("validators.jl")
 
 end
