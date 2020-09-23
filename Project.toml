@@ -14,7 +14,14 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Underscores = "d9a01c3f-67ce-4d8c-9b55-35f6e4050bb1"
 
 [compat]
+Calculus = "0.5.1"
+Lazy = "0.15.1"
+MLStyle = "0.4.6"
+MatrixDepot = "0.8.0"
+Optim = "1.2.0"
+Underscores = "2.0.0"
 julia = "1.5"
+
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
