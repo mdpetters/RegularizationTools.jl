@@ -1,7 +1,7 @@
 name = "RegularizationTools"
 uuid = "29dad682-9a27-4bc3-9c72-016788665182"
 authors = ["Markus Petters"]
-version = "0.1"
+version = "0.1.0"
 
 [deps]
 Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
