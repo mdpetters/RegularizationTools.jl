@@ -18,10 +18,9 @@ Calculus = "0.5.1"
 Lazy = "0.15.1"
 MLStyle = "0.4.6"
 MatrixDepot = "0.8.0"
-Optim = "0.22.0"
+Optim = "0.22.0, 1.2"
 Underscores = "2.0.0"
 julia = "1.5"
-
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
