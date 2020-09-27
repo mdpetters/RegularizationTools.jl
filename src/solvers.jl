@@ -54,12 +54,6 @@ end
 
 Converts vector b to standard form using (Hansen, 1998)
 
-```math
-{\rm \bar{b}={\rm {\bf H}_q^{T}{\rm b}}}
-```
-
-where ``\rm {\bf H}_q^T`` is defined in [RegularizationProblem](@ref)
-
 Example Usage (Regular Syntax)
 ```julia
 b̄ = to_standard_form(Ψ, b)
@@ -70,22 +64,12 @@ Example Usage (Lazy Syntax)
 b̄ = @>> b to_standard_form(Ψ)
 ```
 """
-to_standard_form(Ψ::RegularizationProblem, b::AbstractVector) = Ψ.Hqᵀ * b
+to_standard_form(Ψ::RegularizationProblem, b::AbstractVector) = b
 
 @doc raw"""
     to_standard_form(Ψ::RegularizationProblem, b::AbstractVector, x₀::AbstractVector)
 
 Converts vector b and x₀ to standard form using (Hansen, 1998)
-
-```math
-{\rm \bar{b}={\rm {\bf H}_q^{T}{\rm b}}}
-```
-
-```math
-{\rm \bar{x}_{0}={\rm {\bf H}_qx_{0}}}
-```
-
-where ``\rm {\bf H}_q^T`` and ``\rm {\bf L}`` are defined in [RegularizationProblem](@ref)
 
 Example Usage (Regular Syntax)
 ```julia
@@ -93,15 +77,18 @@ b̄ = to_standard_form(Ψ, b, x₀)
 ```
 """
 to_standard_form(Ψ::RegularizationProblem, b::AbstractVector, x₀::AbstractVector) =
-    Ψ.Hqᵀ * b, Ψ.L * x₀
+    b, Ψ.L * x₀
 
 @doc raw"""
     to_general_form(Ψ::RegularizationProblem, b::AbstractVector, x̄::AbstractVector)
 
-Converts solution ``\bar {\rm x}`` computed in standard form back to general form ``{\rm x}`` using (Hansen, 1998)
+Converts solution ``\bar {\rm x}`` computed in standard form back to general form 
+``{\rm x}`` using (Hansen, 1998). Solution is truncated to regularized space, given
+by the matrix L. If L is p × n and p < n, then only the solution 1:p is valid. The remaining 
+parameters can be estiamted from the least-squares solution if needed.
 
 ```math
-{\rm x}={\rm {\bf L^{+}}\bar{x}+K_{0}T_{0}^{-1}{\rm {\bf {H}_{\rm 0}^{{\rm T}}}({\rm b-{\rm {\bf A}{\rm {\bf L^{{\rm +}}{\rm \bar{x})}}}}}}}
+{\rm x}={\rm {\bf L^{+}_A}\bar{x}}
 ```
 
 where the matrices and vectors are defined in [RegularizationProblem](@ref)
@@ -116,8 +103,15 @@ Example Usage (Lazy Syntax)
 x = @>> x̄ to_general_form(Ψ, b) 
 ```
 """
-to_general_form(Ψ::RegularizationProblem, b::AbstractVector, x̄::AbstractVector) =
-    Ψ.L⁺ * x̄ + Ψ.K0 * Ψ.T0^(-1) * Ψ.H0ᵀ * (b - Ψ.A * Ψ.L⁺ * x̄)
+function to_general_form(Ψ::RegularizationProblem, b::AbstractVector, x̄::AbstractVector) 
+    n, p = size(Ψ.L⁺ₐ)
+    x = Ψ.L⁺ₐ * x̄ 
+    if p < n 
+        return x[1:p]
+    else 
+        return x
+    end 
+end
 
 @doc raw"""
     solve(Ψ::RegularizationProblem, b̄::AbstractVector, λ::AbstractFloat)
@@ -150,7 +144,7 @@ x = @>> x̄ to_general_form(Ψ, b)          # Convert back to general form
 solve(Ψ::RegularizationProblem, b̄::AbstractVector, λ::AbstractFloat) =
     cholesky!(Hermitian(zot(Ψ.ĀĀ, λ^2.0))) \ (Ψ.Ā' * b̄)
 
- @doc raw"""
+@doc raw"""
     solve(Ψ::RegularizationProblem, b̄::AbstractVector, x̄₀::AbstractVector, λ::AbstractFloat)
 
 Compute the Tikhonov solution for problem Ψ in standard form for regularization parameter λ
@@ -297,39 +291,7 @@ setupRegularizationProblem(A::AbstractMatrix, order::Int) =
     setupRegularizationProblem(A::AbstractMatrix, L::AbstractMatrix)
 
 Precompute matrices to initialize Reguluarization Problem based on design matrix and 
-Tikhonov smoothing matrix. 
-
-(1) Pseudo-inverse of L (used in standard form transformation)
-
-```math
-{\bf L^{+}}=({\rm {\bf L}^{T}}{\rm {\rm {\bf L}}})^{-1}{\rm {\rm {\bf L}}}
-```
-
-(2) QR factorization of L' (used in standard form transformation)
-```math
-{\rm {\bf L}^{T}}={\rm {\bf K}{\bf R}}=\left({\rm {\rm {\bf K}}_{p}},{\rm {\bf K}}_{0}\right)\left(\begin{array}{c}
-{\rm R_{p}}\\
-0
-\end{array}\right)
-```
-
-(3) QR factorization of AK (used in standard form transformation)
-```math
-{\rm {\bf A}{\rm {\bf K}}_{0}}={\rm {\bf H}{\bf T}}=\left({\rm {\rm {\bf H}}_{0}},{\rm {\bf H}}_{{\rm q}}\right)\left(\begin{array}{c}
-{\rm T_{0}}\\
-0
-\end{array}\right)
-```
-
-(4) Computation of Ā (used in standard form transformation)
-```math
-{\bf \bar{A}}={\rm {\bf H}}_{{\rm q}}^{{\rm T}}{\rm {\bf A}{\bf L^{+}}}
-```
-
-(5) Computation and storage of Ā'Ā (used in Tikhonov solution in standard form)
-```math
-{\rm {\bf \bar{A}}}{\rm {\bf \bar{A}}}={\rm {\bf \bar{A}}}^{{\rm T}}{\rm {\bf \bar{A}}}
-```
+Tikhonov smoothing matrix. See Hansen (1998, Eq. 2.35)
 
 Example Usage
 ```julia
@@ -337,20 +299,17 @@ Example Usage
 ```
 """
 function setupRegularizationProblem(A::AbstractMatrix, L::AbstractMatrix)
-    n, p = size(L')
+    p, n = size(L)
     Iₙ = Matrix{Float64}(I, n, n) 
     Iₚ = Matrix{Float64}(I, p, p)
-    L⁺ = convert(Matrix, (L' * L)^(-1) * L')
-    K, R = qr(L')
-    K = convert(Matrix,K)
-    Kp = convert(Matrix,(view(K,:,1:n)))
-    K0 = convert(Vector, (view(K,:,n)))
-    H, T = qr(hcat(A * K0))
-    H = H*Iₙ
-    H0ᵀ = convert(Matrix,(view(H,:,1))')
-    Hqᵀ = convert(Matrix,(view(H, :, 1:n))')
-    T0 = T
-    Ā = Hqᵀ[:,:] * A * L⁺
+    F = svd(A,L)
+    U = F.U
+    V = F.V
+    Σ = Matrix(F.D1)
+    M = Matrix(F.D2)
+    X = inv((F.R0*F.Q'))
+    L⁺ₐ = X*pinv(M)*V'
+    Ā = A*L⁺ₐ
 
     RegularizationProblem(
         Ā,
@@ -361,10 +320,6 @@ function setupRegularizationProblem(A::AbstractMatrix, L::AbstractMatrix)
         svd(Ā),
         Iₙ,
         Iₚ,
-        L⁺,
-        Hqᵀ,
-        H0ᵀ,
-        T0,
-        K0,
+        L⁺ₐ,
     )
 end
