@@ -256,7 +256,7 @@ is 0.9 and corresponds to the corner of the L-curve.
 
 ## Benchmarks
 
-Systems up to a few 1000 equations are unproblematic. The setup for much larger system slows down due to the ``\approx O(n^2)`` (or worse) time complexity of the SVD and QR factorization of the design matrix. Larger systems require switching to SVD free algorithms, which currently are supported by this package. 
+Systems up to a 1000 equations are unproblematic. The setup for much larger system slows down due to the ``\approx O(n^2)`` (or worse) time complexity of the SVD and generalized SVD factorization of the design matrix. Larger systems require switching to SVD free algorithms, which are currently not supported by this package. 
 
 ```@example
 using RegularizationTools, TimerOutputs, MatrixDepot
@@ -269,7 +269,7 @@ function benchmark(n)
     y = A * x
     b = y + 0.05y .* randn(n)
     Ψ = setupRegularizationProblem(A, 2)
-    for i = 1:5
+    for i = 1:1
         @timeit to "Setup  (n = $n)" setupRegularizationProblem(A, 2)
         @timeit to "Invert (n = $n)" solve(Ψ, b)
     end

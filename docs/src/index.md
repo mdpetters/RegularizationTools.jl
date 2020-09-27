@@ -7,7 +7,7 @@ RegularizationTools.jl bundles a set routines to compute the [regularized  Tikho
 ## Package Features
 - Computes the Tikhonov inverse solution.
 - Computes optimal regularization parameter using generalized cross validation or the L-curve.
-- Solves problems with up to a few 1000s equations.
+- Solves problems with up to a 1000 equations.
 - Supports zero, first, and second order regularization out of the box.
 - Supports specifying an *a-priori* estimate of the solution.
 - Supports user specified smoothing matrices.
@@ -54,7 +54,7 @@ standard_plot(y, b, x, xλ, x₀) # hide
 The package can be installed from the Julia package prompt with
 
 ```julia
-julia> ]add  https://github.com/mdpetters/RegularizationTools.jl.git
+julia> ]add RegularizationTools
 ```
 
 The closing square bracket switches to the package manager interface and the ```add``` command installs the package and any missing dependencies. To return to the Julia REPL hit the ```delete``` key.
