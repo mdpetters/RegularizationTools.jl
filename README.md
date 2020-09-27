@@ -11,7 +11,7 @@
 The package can be installed from the Julia package prompt with
 
 ```julia
-julia> ]add https://github.com/mdpetters/RegularizationTools.jl.git 
+julia> ]add RegularizationTools
 ```
 
 The closing square bracket switches to the package manager interface and the ```add``` command installs the package and any missing dependencies. To return to the Julia REPL hit the ```delete``` key.
