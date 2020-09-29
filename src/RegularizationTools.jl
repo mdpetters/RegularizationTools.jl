@@ -66,6 +66,7 @@ struct RegularizedSolution
     solution::Optim.UnivariateOptimizationResults
 end
 
+BLAS.set_num_threads(1)
 include("solvers.jl")
 include("validators.jl")
 
