@@ -272,6 +272,106 @@ function solve(
 end
 
 @doc raw"""
+    function solve(
+        Ψ::RegularizationProblem, 
+        b::AbstractVector,
+        lower::AbstractVector, 
+        upper::AbstractVector;
+        kwargs...
+    )
+
+Constraint minimization of [RegualrizationProblem](@ref) Ψ, with observations b and
+upper and lower bounds for each xᵢ.
+
+The function computes the algebraic solution using ```solve(Ψ, b; kwargs...)```, truncates the
+solution at the upper and lower bounds and uses this solution as initial condition for
+the minimization problem using a Least Squares numerical solver. The returned solution
+is using the regularization parameter λ obtained from the algebraic solution.
+"""
+function solve(
+    Ψ::RegularizationProblem, 
+    b::AbstractVector,
+    lower::AbstractVector, 
+    upper::AbstractVector;
+    kwargs...
+)
+    return solve_numeric(Ψ, b, solve(Ψ, b; kwargs...), lower, upper)
+end
+
+@doc raw"""
+    function solve(
+        Ψ::RegularizationProblem, 
+        b::AbstractVector,
+        x₀::AbstractVector,
+        lower::AbstractVector, 
+        upper::AbstractVector;
+        kwargs...
+    )
+
+
+Constraint minimization of [RegualrizationProblem](@ref) Ψ, with observations b, intial 
+guess x₀ and upper and lower bounds for each xᵢ.
+
+The function computes the algebraic solution using ```solve(Ψ, b; kwargs...)```, truncates the
+solution at the upper and lower bounds and uses this solution as initial condition for
+the minimization problem using a Least Squares numerical solver. The returned solution
+is using the regularization parameter λ obtained from the algebraic solution.
+"""    
+function solve(
+    Ψ::RegularizationProblem, 
+    b::AbstractVector,
+    x₀::AbstractVector,
+    lower::AbstractVector, 
+    upper::AbstractVector;
+    kwargs...
+)
+    return solve_numeric(Ψ, b, solve(Ψ, b, x₀; kwargs...), lower, upper)
+end
+
+
+function solve_numeric(
+    Ψ::RegularizationProblem, 
+    b::AbstractVector, 
+    xλ::RegularizedSolution,
+    lower::AbstractVector,
+    upper::AbstractVector
+)
+    λ = xλ.λ  
+    xᵢ = xλ.x
+    xᵢ[xᵢ .< lower] .= lower[xᵢ .< lower]
+    xᵢ[xᵢ .> upper] .= upper[xᵢ .> upper]
+    
+    n = length(b)
+    LᵀL = Ψ.L'*Ψ.L
+    
+    function f!(out, x)
+        out[1] = norm(Ψ.A*x - b)^2.0 + λ^2.0*norm(LᵀL*x)^2.0
+    end
+    
+    function g!(out, x)
+        ot = Ψ.A'*(Ψ.A*x - b) + λ^2.0*LᵀL*x
+        [out[i] = 2.0*ot[i] for i = 1:n]
+    end
+    
+    LLSQ = LeastSquaresProblem(
+        x = xᵢ, 
+        f! = f!, 
+        g! = g!,
+        output_length=n
+    )
+   
+    r = optimize!(
+        LLSQ, 
+        Dogleg(LeastSquaresOptim.QR()), 
+        lower = lower, 
+        upper = upper,
+        x_tol=1e-10
+    ) 
+    return return RegularizedSolution(r.minimizer, λ, r)
+end
+
+
+@doc raw"""
     setupRegularizationProblem(A::AbstractMatrix, order::Int)
 
 Precompute matrices to initialize Reguluarization Problem based on design matrix A and 

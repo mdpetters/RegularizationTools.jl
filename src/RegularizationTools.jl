@@ -6,6 +6,7 @@ using Lazy
 using Underscores
 using Optim
 using Calculus
+using LeastSquaresOptim
 
 export setupRegularizationProblem,
     RegularizationProblem,
@@ -63,7 +64,7 @@ solution is the raw output from the Optim search.
 struct RegularizedSolution
     x::AbstractVector
     λ::AbstractFloat
-    solution::Optim.UnivariateOptimizationResults
+    solution::Any
 end
 
 BLAS.set_num_threads(1)
