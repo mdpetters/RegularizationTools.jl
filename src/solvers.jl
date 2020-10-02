@@ -280,7 +280,7 @@ end
         kwargs...
     )
 
-Constraint minimization of [RegualrizationProblem](@ref) Ψ, with observations b and
+Constraint minimization of [RegularizationProblem](@ref) Ψ, with observations b and
 upper and lower bounds for each xᵢ.
 
 The function computes the algebraic solution using ```solve(Ψ, b; kwargs...)```, truncates the
@@ -309,7 +309,7 @@ end
     )
 
 
-Constraint minimization of [RegualrizationProblem](@ref) Ψ, with observations b, intial 
+Constraint minimization of [RegularizationProblem](@ref) Ψ, with observations b, intial 
 guess x₀ and upper and lower bounds for each xᵢ.
 
 The function computes the algebraic solution using ```solve(Ψ, b; kwargs...)```, truncates the

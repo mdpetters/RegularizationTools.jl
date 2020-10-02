@@ -131,7 +131,7 @@ You can specify custom ``{\rm {\bf L}}`` matrices when setting up problems.
 setupRegularizationProblem(A::AbstractMatrix, L::AbstractMatrix)
 ```
 
-For example, Huckle and Sedlacek (2010) propose a two-step data based regularization
+For example, Huckle and Sedlacek (2012) propose a two-step data based regularization
 
 ```math
 {\rm {\bf L}} = {\rm {\bf L}}_k {\rm {\bf D}}_{\hat{x}}^{-1} 
@@ -142,7 +142,7 @@ where ``{\rm {\bf L}}_k`` is one of the finite difference approximations of a de
 
 ### Example 3: [Heat Problem ](https://matrixdepotjl.readthedocs.io/en/latest/regu.html#term-heat)  
 
-This examples illustrates how to implement the Huckle and Sedlacek (2010) matrix. Note that ```Γ(A, 2)``` returns the [Tikhonov Matrix](@ref) of order 2. 
+This examples illustrates how to implement the Huckle and Sedlacek (2012) matrix. Note that ```Γ(A, 2)``` returns the [Tikhonov Matrix](@ref) of order 2. 
 
 ```@example
 using RegularizationTools, MatrixDepot, Lazy, Random, LinearAlgebra
@@ -166,6 +166,40 @@ standard_plot1(y, b, x, xλ1, xλ2) # hide
 ```
 
 The solution xλ2 is improved over the regular L₂ solution. 
+
+## Adding Boundary Constraints
+To add boundary constraints (e.g. enforce that all solutions are positive), the following procedure is implemented. Computes the algebraic solution without constraints, truncate the solution at the upper and lower bounds, and ues this solution as initial condition for the minimization problem using a Least Squares numerical solver [LeastSquaresOptim](https://github.com/matthieugomez/LeastSquaresOptim.jl). The regularization parameter λ obtained from the algebraic solution is used for a single pass optimization. See [Solve](@ref) for a complete list of methods.
+
+```@example
+using RegularizationTools, MatrixDepot, Lazy, Random, LinearAlgebra
+
+r = mdopen("heat", 100, false)
+A, x = r.A, r.x
+Random.seed!(150) #hide
+
+y = A * x
+b = y + 0.05y .* randn(100)
+x₀ = zeros(length(b))
+
+L₂ = Γ(A,2)                  
+xλ1 = @> setupRegularizationProblem(A, L₂) solve(b) getfield(:x)
+x̂ = deepcopy(abs.(xλ1))
+x̂[abs.(x̂) .< 0.1] .= 0.1
+ψ = @>> L₂*Diagonal(x̂)^(-1) setupRegularizationProblem(A) 
+lower = zeros(100)
+upper = ones(100)
+xλ2 = @> solve(ψ, b, lower, upper) getfield(:x)
+include("theory/helpers.jl") # hide
+standard_plot1(y, b, x, xλ1, xλ2) # hide
+```
+
+This is the same example as above, but imposing a lower and upper bound on the solution. Note that this solve method computes the algebraic solution using ```solve(Ψ, b; kwargs...)``` method to compute the starting point for the least square minimization. You can also call
+
+```julia
+xλ2 = @> solve(ψ, b, x₀, lower, upper) getfield(:x)
+```
+
+to bound the least-square solver by the output from the ```solve(Ψ, b, x₀; kwargs...)``` method.
 
 ## Customizing the Search Algorithm
 The solve function searches for the optimum regularization parameter ``\lambda`` between ``[\lambda_1, \lambda_2]``. The default search range is [0.001, 1000.0] and the interval range can be modified through keyword parameters. The optimality criterion is either the minimum of the [Generalized Cross Validation](@ref) function, or the the maximum curvature of the L-curve (see [L-Curve Algorithm](@ref)). The algorithm can be specified through the alg keyword. Valid algorithms are ```:L_curve```, ```:gcv_svd```, and ```:gcv_tr``` (see [Solve](@ref)).
