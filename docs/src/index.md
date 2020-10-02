@@ -27,7 +27,7 @@ The package computes the regularized Tikhonov inverse ``{\rm x_{\lambda}}`` by s
 {\rm {\rm x_{\lambda}}}=\arg\min\left\{ \left\lVert {\bf {\rm {\bf A}{\rm x}-{\rm b}}}\right\rVert _{2}^{2}+\lambda^{2}\left\lVert {\rm {\bf L}({\rm x}-{\rm x_{0}})}\right\rVert _{2}^{2}\right\} 
 ```
 
-subject to the optional constraint ``{\rm x}_{l}>{\rm x}>{\rm x}_{u}``. Here ``{\rm x_{\lambda}}`` is the regularized estimate of ``{\rm x}``,
+subject to the optional constraint ``{\rm x}_{l}<{\rm x}<{\rm x}_{u}``. Here ``{\rm x_{\lambda}}`` is the regularized estimate of ``{\rm x}``,
 ``\left\lVert \cdot\right\rVert _{2}`` is the Euclidean norm, ``{\rm {\bf L}}`` is the Tikhonov filter matrix, ``\lambda`` is the regularization parameter, and ``{\rm x_{0}}`` is a vector of an *a-priori* guess of the solution. The initial guess can be taken to be ``{\rm x_{0}}=0`` if no *a-priori* information is known. The solve function searches for the optimal ``\lambda`` and returns the inverse. Optionally, ``{\rm x}_{l}`` and ``{\rm x}_{u}`` can be used to impose boundary constraints on the solution ``{\rm x_{\lambda}}``.
 
 The following script is a minimalist example how to use this package.

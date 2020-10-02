@@ -168,7 +168,7 @@ standard_plot1(y, b, x, xλ1, xλ2) # hide
 The solution xλ2 is improved over the regular L₂ solution. 
 
 ## Adding Boundary Constraints
-To add boundary constraints (e.g. enforce that all solutions are positive), the following procedure is implemented. Computes the algebraic solution without constraints, truncate the solution at the upper and lower bounds, and ues this solution as initial condition for the minimization problem using a Least Squares numerical solver [LeastSquaresOptim](https://github.com/matthieugomez/LeastSquaresOptim.jl). The regularization parameter λ obtained from the algebraic solution is used for a single pass optimization. See [Solve](@ref) for a complete list of methods.
+To add boundary constraints (e.g. enforce that all solutions are positive), the following procedure is implemented. Computes the algebraic solution without constraints, truncate the solution at the upper and lower bounds, and use the result as initial condition for solving the minimization problem with a least squares numerical solver [LeastSquaresOptim](https://github.com/matthieugomez/LeastSquaresOptim.jl). The regularization parameter λ obtained from the algebraic solution is used for a single pass optimization. See [Solve](@ref) for a complete list of methods.
 
 ```@example
 using RegularizationTools, MatrixDepot, Lazy, Random, LinearAlgebra
