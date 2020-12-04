@@ -10,4 +10,5 @@ using Lazy
     include("standard_form.jl")  # Test standard form transformation
     include("solvers.jl")        # Test optimization
     include("validators.jl")     # Test validators
+    include("domainfunctions.jl")
 end
