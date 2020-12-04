@@ -204,19 +204,19 @@ to bound the least-square solver by the output from the ```solve(Ψ, b, x₀; kw
 ## Customizing the Search Algorithm
 The solve function searches for the optimum regularization parameter ``\lambda`` between ``[\lambda_1, \lambda_2]``. The default search range is [0.001, 1000.0] and the interval range can be modified through keyword parameters. The optimality criterion is either the minimum of the [Generalized Cross Validation](@ref) function, or the the maximum curvature of the L-curve (see [L-Curve Algorithm](@ref)). The algorithm can be specified through the alg keyword. Valid algorithms are ```:L_curve```, ```:gcv_svd```, and ```:gcv_tr``` (see [Solve](@ref)).
 
-### Example: [Baart Problem](https://matrixdepotjl.readthedocs.io/en/latest/regu.html#term-baart)
+### Example 
 
 ```@example
 using RegularizationTools, MatrixDepot, Lazy, Random
 
-r = mdopen("baart", 100, false)
+r = mdopen("shaw", 100, false)
 A, x = r.A, r.x
-Random.seed!(150) #hide
+Random.seed!(100) #hide
 
 y = A  * x
 b = y + 0.1y .* randn(100)
 
-xλ1 = @> setupRegularizationProblem(A,1) solve(b, alg=:L_curve, λ₁=100.0, λ₂=1e6) getfield(:x)
+xλ1 = @> setupRegularizationProblem(A,1) solve(b, alg=:L_curve, λ₁=0.1, λ₂=10.0) getfield(:x)
 xλ2 = @> setupRegularizationProblem(A,1) solve(b, alg=:gcv_svd) getfield(:x)
 include("theory/helpers.jl") # hide
 x₀ = 0.0*x # hide
