@@ -4,6 +4,12 @@
 ---
 ## current master
 
+## v0.3.0
+- Add abstract interface to generate design matrix from a forward model.
+- Add documentation and examples how to use the interface
+- Add fallback in solve function in case cholesky factorization fails.
+- Fix bug when creating L matrix for non-square design matrices.
+
 ## v0.2.0
 - Add constraint minimization solver to enfore upper and lower bound for some problems.
 - Add documentation.
