@@ -11,13 +11,17 @@ using LeastSquaresOptim
 export setupRegularizationProblem,
     RegularizationProblem,
     RegularizedSolution,
+    Domain,
     solve,
     to_standard_form,
     to_general_form,
     gcv_tr,
     gcv_svd,
     Lcurve_functions,
-    Γ
+    Γ,
+    forwardmodel,
+    designmatrix
+    
 
 @doc raw"""
     RegularizationProblem
@@ -67,8 +71,26 @@ struct RegularizedSolution
     solution::Any
 end
 
+@doc raw"""
+    Domain{T1<:Any,T2<:Number,T3<:Any}
+
+Functor to map from a domain characterized by a list of setpoints [s], each 
+associated with a list of numerical values [x] to a query value q. 
+
+    s::AbstractVector{T1}
+    x::AbstractVector{T2}
+    q::T3
+"""
+struct Domain{T1<:Any,T2<:Number,T3<:Any}
+    s::AbstractVector{T1}
+    x::AbstractVector{T2}
+    q::T3
+end
+
+
 BLAS.set_num_threads(1)
 include("solvers.jl")
 include("validators.jl")
+include("genericfunctions.jl")
 
 end

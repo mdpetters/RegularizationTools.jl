@@ -11,6 +11,11 @@ RegularizationProblem
 RegularizedSolution
 ```
 
+### Domain
+```@docs
+Domain
+```
+
 ## Constructor Functions
 
 ### Tikhonov Matrix
@@ -54,4 +59,16 @@ gcv_svd
 ### L-curve Functions
 ```@docs
 Lcurve_functions
+```
+
+## Generic Functions
+
+### designmatrix
+```@docs
+designmatrix
+```
+
+### forwardmodel
+```@docs
+forwardmodel
 ```

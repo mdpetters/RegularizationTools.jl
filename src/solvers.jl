@@ -9,7 +9,7 @@ L = Γ(A, 1)
 ```
 """
 function Γ(A::AbstractMatrix, order::Int)
-    n = size(A, 1)
+    n = size(A'A, 1)
 
     @match order begin
         0 => zot(n)
@@ -23,7 +23,7 @@ zot(n) = Matrix{Float64}(I, n, n)
 
 function zot(A::AbstractMatrix, λ::AbstractFloat)
     a = deepcopy(A)
-    n = size(a, 1)
+    n = size(A'A, 1)
     for i = 1:n
         @inbounds a[i, i] += λ
     end
@@ -141,8 +141,11 @@ x̄ = solve(A, b̄, 0.5)                     # Solve the equation
 x = @>> x̄ to_general_form(Ψ, b)          # Convert back to general form
 ```
 """
-solve(Ψ::RegularizationProblem, b̄::AbstractVector, λ::AbstractFloat) =
+solve(Ψ::RegularizationProblem, b̄::AbstractVector, λ::AbstractFloat) = try
     cholesky!(Hermitian(zot(Ψ.ĀĀ, λ^2.0))) \ (Ψ.Ā' * b̄)
+catch
+     zot(Ψ.ĀĀ, λ^2.0) \ (Ψ.Ā' * b̄)
+end
 
 @doc raw"""
     solve(Ψ::RegularizationProblem, b̄::AbstractVector, x̄₀::AbstractVector, λ::AbstractFloat)
@@ -164,9 +167,11 @@ x̄ = solve(A, b̄, x̄₀, 0.5)                 # Solve the equation
 x = to_general_form(Ψ, b, x̄)             # Convert back to general form
 ```
 """
-solve(Ψ::RegularizationProblem, b̄::AbstractVector, x̄₀::AbstractVector, λ::AbstractFloat) =
+solve(Ψ::RegularizationProblem, b̄::AbstractVector, x̄₀::AbstractVector, λ::AbstractFloat) = try
     cholesky!(Hermitian(zot(Ψ.ĀĀ, λ^2.0))) \ (Ψ.Ā' * b̄ + λ^2.0 * x̄₀)
-
+catch
+    zot(Ψ.ĀĀ, λ^2.0) \ (Ψ.Ā' * b̄ + λ^2.0 * x̄₀)
+end
 
 @doc raw"""
     function solve(

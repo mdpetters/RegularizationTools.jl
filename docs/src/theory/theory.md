@@ -350,7 +350,7 @@ The solution ``{\rm \bar x_{\lambda}}`` for the transformed standard equation is
 {\rm \bar x_{\lambda}}=\left({\rm {\bf \bar A}^{T}}{\rm {\bf \bar A}}+\lambda^{2}{\rm {\bf I}}\right)^{-1} \left( {\rm {\bf \bar A}^{T}}{\rm \bar b} + λ^2 \rm \bar {x}_0 \right)
 ```
 
-``{\rm \bar x_{\lambda}}`` is found using the [Cholesky decomposition](https://en.wikipedia.org/wiki/Cholesky_decomposition). It is the alorithm used in the [MultivariateStats](https://multivariatestatsjl.readthedocs.io/en/stable/index.html) package and generally faster than the QR approach (Lira et al., 2016).
+``{\rm \bar x_{\lambda}}`` is found using the [Cholesky decomposition](https://en.wikipedia.org/wiki/Cholesky_decomposition). It is the alorithm used in the [MultivariateStats](https://multivariatestatsjl.readthedocs.io/en/stable/index.html) package and generally faster than the QR approach (Lira et al., 2016). In case the Cholesky factorization fails, the default julia equation solver is used.
 
 ## L-Curve Algorithm
 The curvature ``\kappa(\lambda)`` of the L-curve is computed using Eq. (18) in Hansen (2000). The expression requires calculation of the solution and residual norms, as well as the first derivative of the solution norm. The derivative is calculated using finite differences from the [Calculus](https://github.com/JuliaMath/Calculus.jl) package
