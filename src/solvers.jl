@@ -403,7 +403,7 @@ Example Usage
 Ψ = setupRegularizationProblem(A, L) 
 ```
 """
-function setupRegularizationProblem(A::AbstractMatrix, L::AbstractMatrix)
+@memoize function setupRegularizationProblem(A::AbstractMatrix, L::AbstractMatrix)
     p, n = size(L)
     Iₙ = Matrix{Float64}(I, n, n) 
     Iₚ = Matrix{Float64}(I, p, p)

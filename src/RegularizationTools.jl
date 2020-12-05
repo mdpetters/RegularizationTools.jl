@@ -6,6 +6,7 @@ using Lazy
 using Underscores
 using Optim
 using Calculus
+using Memoize
 using LeastSquaresOptim
 
 export setupRegularizationProblem,

@@ -150,9 +150,9 @@ uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[HDF5]]
 deps = ["Blosc", "Compat", "HDF5_jll", "Libdl", "Mmap", "Random", "Requires"]
-git-tree-sha1 = "96d77533eb46e208e801b939db8a27626c166565"
+git-tree-sha1 = "9d8d16c7c46b20794c99a1604c6600b34b04580c"
 uuid = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
-version = "0.14.1"
+version = "0.14.2"
 
 [[HDF5_jll]]
 deps = ["Artifacts", "JLLWrappers", "LibCURL_jll", "Libdl", "OpenSSL_jll", "Pkg", "Zlib_jll"]
@@ -269,6 +269,12 @@ git-tree-sha1 = "0eef589dd1c26a3ac9d753fe1a8bcad63f956fa6"
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
 version = "2.16.8+1"
 
+[[Memoize]]
+deps = ["MacroTools"]
+git-tree-sha1 = "62c5ae937a0d28704de3c300ae022e17a8903802"
+uuid = "c03570c3-d221-55d1-a50c-7939bbd78826"
+version = "0.4.3"
+
 [[Missings]]
 deps = ["DataAPI"]
 git-tree-sha1 = "ed61674a0864832495ffe0a7e889c0da76b0f4c8"
@@ -320,9 +326,9 @@ version = "0.12.1"
 
 [[Parsers]]
 deps = ["Dates"]
-git-tree-sha1 = "b417be52e8be24e916e34b3d70ec2da7bdf56a68"
+git-tree-sha1 = "9d738ba28afdbd877397fb24d48440244590e039"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "1.0.12"
+version = "1.0.13"
 
 [[Pkg]]
 deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
