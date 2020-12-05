@@ -346,8 +346,8 @@ function solve_numeric(
     xᵢ[xᵢ .< lower] .= lower[xᵢ .< lower]
     xᵢ[xᵢ .> upper] .= upper[xᵢ .> upper]
     
-    n = length(b)
     LᵀL = Ψ.L'*Ψ.L
+    n = size(LᵀL,1)
     
     function f!(out, x)
         out[1] = norm(Ψ.A*x - b)^2.0 + λ^2.0*norm(LᵀL*x)^2.0
