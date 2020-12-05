@@ -22,7 +22,8 @@ Vλ = @_ map(gcv_tr(Ψ, b̄, _), [0.1, 1.0, 10.0]) # V(λ) for array of λ
 function gcv_tr(Ψ::RegularizationProblem, b̄::AbstractVector, λ::AbstractFloat)
     n = size(Ψ.Ā, 1)
     Aλ = Ψ.Ā * inv(Ψ.ĀĀ + λ^2.0 * Ψ.Iₚ) * Ψ.Ā'
-    return n * norm((Ψ.Iₙ - Aλ) * b̄)^2.0 / tr(Ψ.Iₙ - Aλ)^2.0
+    Iₙ = Matrix{Float64}(I, length(b̄), length(b̄)) 
+    return n * norm((Iₙ - Aλ) * b̄)^2.0 / tr(Iₙ - Aλ)^2.0
 end
 
 
@@ -61,7 +62,8 @@ function gcv_tr(
     x̄(λ::AbstractFloat) = solve(Ψ, b̄, x̄₀, λ)
     L1(λ::AbstractFloat) = norm(Ψ.Ā * x̄(λ) - b̄)
     Aλ = Ψ.Ā * inv(Ψ.ĀĀ + λ^2.0 * Ψ.Iₚ) * Ψ.Ā'
-    return n * L1(λ)^2.0 / tr(Ψ.Iₙ - Aλ)^2.0
+    Iₙ = Matrix{Float64}(I, length(b̄), length(b̄)) 
+    return n * L1(λ)^2.0 / tr(Iₙ - Aλ)^2.0
 end
 
 @doc raw"""
