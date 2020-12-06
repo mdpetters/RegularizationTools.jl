@@ -4,6 +4,11 @@
 ---
 ## current master
 
+## v0.3.1
+- Add memoization
+- Merge CompatHelper: add new compat entry for "Memoize" at version "0.4"
+- Fix various bugs related to non-square matrices
+
 ## v0.3.0
 - Add abstract interface to generate design matrix from a forward model.
 - Add documentation and examples how to use the interface
