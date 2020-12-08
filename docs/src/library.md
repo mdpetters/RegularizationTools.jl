@@ -40,7 +40,7 @@ to_general_form
 
 ## Solvers
 
-### Solve
+### solve
 ```@docs
 solve
 ```
@@ -71,4 +71,11 @@ designmatrix
 ### forwardmodel
 ```@docs
 forwardmodel
+```
+
+## High-Level API
+
+### invert
+```@docs
+invert
 ```

@@ -168,7 +168,7 @@ standard_plot1(y, b, x, xλ1, xλ2) # hide
 The solution xλ2 is improved over the regular L₂ solution. 
 
 ## Adding Boundary Constraints
-To add boundary constraints (e.g. enforce that all solutions are positive), the following procedure is implemented. Computes the algebraic solution without constraints, truncate the solution at the upper and lower bounds, and use the result as initial condition for solving the minimization problem with a least squares numerical solver [LeastSquaresOptim](https://github.com/matthieugomez/LeastSquaresOptim.jl). The regularization parameter λ obtained from the algebraic solution is used for a single pass optimization. See [Solve](@ref) for a complete list of methods.
+To add boundary constraints (e.g. enforce that all solutions are positive), the following procedure is implemented. Compute the algebraic solution without constraints, truncate the solution at the upper and lower bounds, and use the result as initial condition for solving the minimization problem with a least squares numerical solver [LeastSquaresOptim](https://github.com/matthieugomez/LeastSquaresOptim.jl). The regularization parameter λ obtained from the algebraic solution is used for a single pass optimization. See [solve](@ref) for a complete list of methods.
 
 ```@example
 using RegularizationTools, MatrixDepot, Lazy, Random, LinearAlgebra
@@ -202,7 +202,7 @@ xλ2 = @> solve(ψ, b, x₀, lower, upper) getfield(:x)
 to bound the least-square solver by the output from the ```solve(Ψ, b, x₀; kwargs...)``` method.
 
 ## Customizing the Search Algorithm
-The solve function searches for the optimum regularization parameter ``\lambda`` between ``[\lambda_1, \lambda_2]``. The default search range is [0.001, 1000.0] and the interval range can be modified through keyword parameters. The optimality criterion is either the minimum of the [Generalized Cross Validation](@ref) function, or the the maximum curvature of the L-curve (see [L-Curve Algorithm](@ref)). The algorithm can be specified through the alg keyword. Valid algorithms are ```:L_curve```, ```:gcv_svd```, and ```:gcv_tr``` (see [Solve](@ref)).
+The solve function searches for the optimum regularization parameter ``\lambda`` between ``[\lambda_1, \lambda_2]``. The default search range is [0.001, 1000.0] and the interval range can be modified through keyword parameters. The optimality criterion is either the minimum of the [Generalized Cross Validation](@ref) function, or the the maximum curvature of the L-curve (see [L-Curve Algorithm](@ref)). The algorithm can be specified through the alg keyword. Valid algorithms are ```:L_curve```, ```:gcv_svd```, and ```:gcv_tr``` (see [solve](@ref)).
 
 ### Example 
 
@@ -287,6 +287,65 @@ The calculated λopt from
 ```
 
 is 0.9 and corresponds to the corner of the L-curve.
+
+
+## The Invert Function
+
+The code to perform second order regularization us
+
+```julia
+xλ = @> setupRegularizationProblem(A, 2) solve(b) getfield(:x)
+```
+
+this can become a bit verbose, especially with more elaborate inversion methods. The [invert](@ref) function provides a high-level API. For example the code above can be written as
+
+```julia
+xλ = invert(A, b, Lₖ(2))
+```
+
+here ```Lₖ(2)``` denotes the second order inversion and "2" is a hyperparameter that specifies the order. Several methods are predefined. 
+
+The method nomenclature is 
+
+- ```Lₖ``` for regularization order (see [Specifying the Order](@ref); the hyperparameter is the order k)
+- ```B``` for bounded search (see [Adding Boundary Constraints](@ref); the hyperparameters are the lower and upper bound, lb and ub)
+- ```x₀``` for adding an intial guess
+- ```Dₓ``` for the Huckle and Sedlacek (2012) two-step data based regularization (see [Using a Custom L Matrix](@ref); the hyperparameter is the noise level ε). 
+
+The InverseMethod data type takes the hyper parameters as arguments. The invert function passes all keyword arguments through to the [solve](@ref) function. Examples of method initializations are
+
+```julia
+# Hyper parameters 
+k: order, lb: low bound, ub: upper bound, ε: noise level, x₀: initial guess
+k, lb, ub, ε, x₀ = 2, zeros(8), zeros(8) .+ 50.0, 0.02, 0.5*N
+
+xλ = invert(A, b, Lₖ(k); alg = :gcv_tr, λ₁ = 0.1)
+xλ = invert(A, b, Lₖ(k); alg = :gcv_svd, λ₁ = 0.1)
+xλ = invert(A, b, LₖB(k, lb, ub); alg = :L_curve, λ₁ = 0.1)
+xλ = invert(A, b, Lₖx₀(k, x₀); alg = :L_curve, λ₁ = 0.1)
+xλ = invert(A, b, Lₖx₀(k, x₀); alg = :gcv_tr)
+xλ = invert(A, b, Lₖx₀(k, x₀); alg = :gcv_svd)
+xλ = invert(A, b, Lₖx₀B(k, x₀, lb, ub); alg = :gcv_svd)
+xλ = invert(A, b, LₖDₓ(k, ε); alg = :gcv_svd)
+xλ = invert(A, b, LₖDₓB(k, ε, lb, ub); alg = :gcv_svd)
+xλ = invert(A, b, Lₖx₀Dₓ(k, x₀, ε); alg = :gcv_svd)
+xλ = invert(A, b, Lₖx₀DₓB(k, x₀, ε, lb, ub); alg = :gcv_svd)
+```
+
+The formal definition of the InverseMethod data structure is
+
+```julia
+    @data InverseMethod begin 
+        Lₖ(Int)                              # Pure Tikhonov
+        Lₖx₀(Int, Vector)                    # with initial guess
+        LₖB(Int, Vector, Vector)             # with bounds
+        Lₖx₀B(Int, Vector, Vector, Vector)   # with initial guess + bounds
+        LₖDₓ(Int, Float64)                   # with filter 
+        Lₖx₀Dₓ(Int, Vector, Float64)         # with initial guess + filter 
+        LₖDₓB(Int, Float64, Vector, Vector)  # with filter + bound
+        Lₖx₀DₓB(Int, Vector, Float64, Vector, Vector) # with initial guess + filter + bound
+    end
+```
 
 ## Creating a Design Matrix
 

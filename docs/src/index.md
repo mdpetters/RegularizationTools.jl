@@ -46,7 +46,7 @@ b = y + 0.2y .* randn(100)           # response with superimposed noise
 x₀ = 0.4x                            # some a-priori estimate x₀
 
 # Solve 2nd order Tikhonov inversion (L = uppertridiag(−1, 2, −1)) with intial guess x₀
-xλ = @> setupRegularizationProblem(A, 2) solve(b, x₀) getfield(:x)
+xλ = invert(A, b, Lₖx₀(2, x₀))
 include("theory/helpers.jl") # hide
 standard_plot(y, b, x, xλ, x₀) # hide
 ```
