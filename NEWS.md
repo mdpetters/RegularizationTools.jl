@@ -2,7 +2,9 @@
 
 #### Notes on release changes and ongoing development
 ---
-## current master
+
+## v0.4.0
+- Add high-level API invert function to simplify notation
 
 ## v0.3.1
 - Add memoization
