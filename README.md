@@ -25,7 +25,6 @@ julia> using RegularizationTools
 ## Documentation
 
 - [**STABLE**][docs-stable-url] &mdash; **documentation of the most recently tagged version.**
-- [**DEVEL**][docs-dev-url] &mdash; *documentation of the in-development version.*
 
 ## Project Status
 The current version of the package is being developed for, Julia `1.5` and above on Linux. It very likely works on macOS and Windows as well as older 1.x versions of Julia.
