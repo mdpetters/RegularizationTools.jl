@@ -1,13 +1,13 @@
 module RegularizationTools
 
-using LinearAlgebra
 using MLStyle
-using Lazy
-using Underscores
-using Optim
-using Calculus
 using Memoize
+using Underscores
+using LinearAlgebra
+using Calculus
+using Optim
 using LeastSquaresOptim
+import Lazy.@>, Lazy.@>>, Lazy.@as
 
 export setupRegularizationProblem,
     RegularizationProblem,
@@ -21,8 +21,16 @@ export setupRegularizationProblem,
     Lcurve_functions,
     Γ,
     forwardmodel,
-    designmatrix
-    
+    designmatrix,
+    invert,
+    Lₖ,
+    Lₖx₀,
+    LₖB, 
+    Lₖx₀B, 
+    LₖDₓ,
+    Lₖx₀Dₓ, 
+    LₖDₓB, 
+    Lₖx₀DₓB
 
 @doc raw"""
     RegularizationProblem
@@ -88,10 +96,21 @@ struct Domain{T1<:Any,T2<:Number,T3<:Any}
     q::T3
 end
 
+@data InverseMethod begin 
+    Lₖ(Int)                            # Pure Tikhonov
+    Lₖx₀(Int,Vector)                   # with initial guess
+    LₖB(Int,Vector,Vector)             # with bounds
+    Lₖx₀B(Int,Vector,Vector,Vector)    # with initial guess + bounds
+    LₖDₓ(Int,Float64)                  # with filter 
+    Lₖx₀Dₓ(Int,Vector,Float64)         # with initial guess + filter 
+    LₖDₓB(Int,Float64,Vector,Vector)   # with filter + bound
+    Lₖx₀DₓB(Int,Vector,Float64,Vector,Vector) # with initial guess + filter + bound
+end
 
 BLAS.set_num_threads(1)
 include("solvers.jl")
 include("validators.jl")
 include("genericfunctions.jl")
+include("invert.jl")
 
 end
