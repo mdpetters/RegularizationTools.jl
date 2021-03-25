@@ -38,23 +38,25 @@ xλ1 = @> setupRegularizationProblem(A,2) solve(b, alg=:gcv_svd) getfield(:x)
 xλ2 = invert(A, b, Lₖ(2); alg = :gcv_svd)
 @test xλ1 ≈ xλ2
 
+inrange(x, y, δ) = ifelse((x < y + δ) & (x > y - δ), true, false)
+
 xλ = invert(A, b, Lₖ(2); alg = :gcv_svd, λ₁ = 0.1)
-@test round(sum(xλ), digits = 0) == 176.0
+@test inrange(sum(xλ), 176.0, 2.0) == true
 xλ = invert(A, b, LₖB(2,lb,ub); alg = :L_curve, λ₁ = 0.1)
-@test round(sum(xλ), digits = 0) == 143.0
+@test inrange(sum(xλ), 143.0, 2.0) == true
 xλ = invert(A, b, Lₖx₀(2, x₀); alg = :L_curve, λ₁ = 0.1)
-@test round(sum(xλ), digits = 0) == -105.0
+@test inrange(sum(xλ), -105.0, 2.0) == true
 xλ = invert(A, b, Lₖx₀(2, x₀); alg = :gcv_tr)
-@test round(sum(xλ), digits = 0) == 177
+@test inrange(sum(xλ), 177.0, 2.0) == true
 xλ = invert(A, b, Lₖx₀(2, x₀); alg = :gcv_svd)
-@test round(sum(xλ), digits = 0) == 177
+@test inrange(sum(xλ), 177.0, 2.0) == true
 xλ = invert(A, b, Lₖx₀B(2,x₀,lb,ub); alg = :gcv_svd)
-@test round(sum(xλ), digits = 0) == 179
+@test inrange(sum(xλ), 179.0, 2.0) == true
 xλ = invert(A, b, LₖDₓ(2, ε); alg = :gcv_svd)
-@test round(sum(xλ), digits = 0) == 133.0
+@test inrange(sum(xλ), 133.0, 2.0) == true
 xλ = invert(A, b, LₖDₓB(2, ε, lb, ub); alg = :gcv_svd)
-@test round(sum(xλ), digits = 0) == 139.0
+@test inrange(sum(xλ), 139.0, 2.0) == true
 xλ = invert(A, b, Lₖx₀Dₓ(2,x₀, ε); alg = :gcv_svd)
-@test round(sum(xλ), digits = 0) == 133
+@test inrange(sum(xλ), 133.0, 2.0) == true
 xλ = invert(A, b, Lₖx₀DₓB(2, x₀, ε, lb, ub); alg = :gcv_svd)
-@test round(sum(xλ), digits = 0) == 139
+@test inrange(sum(xλ), 139.0, 2.0) == true
