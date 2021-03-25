@@ -3,6 +3,12 @@
 #### Notes on release changes and ongoing development
 ---
 
+## v0.4.1
+- Minor release associated with julia 1.6.0 
+- Update Project and Manifest
+- Make tests of invert function resilient against changes in random number generator
+- Change order in scattering example to 2
+
 ## v0.4.0
 - Add high-level API invert function to simplify notation
 
