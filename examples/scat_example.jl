@@ -43,5 +43,5 @@ b = forwardmodel(s, N, q, f)
 y = A*N 
 b = A*N .+ 0.01*y .* randn(6)
 
-xλ = @> setupRegularizationProblem(A,0) solve(b, alg=:gcv_svd) getfield(:x)
+xλ = @> setupRegularizationProblem(A,2) solve(b, alg=:gcv_svd) getfield(:x)
 plot(x = Dp, y = xλ, Geom.line, layer(x = Dp, y = N))
