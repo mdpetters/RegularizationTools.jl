@@ -30,7 +30,7 @@ julia> using RegularizationTools
 The current version of the package is being developed for, Julia `1.5` and above on Linux. It very likely works on macOS and Windows as well as older 1.x versions of Julia.
 
 ## Citations
-This work was supported by the United States Department of Energy, Office of Science, Biological and Environment Research, Grant number DE-SC0018265.
+This work was supported by the United States Department of Energy, Office of Science, Biological and Environment Research, Grant number DE-SC0021074.
 
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [docs-dev-url]: https://mdpetters.github.io/RegularizationTools.jl/latest/
