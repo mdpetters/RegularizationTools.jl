@@ -34,8 +34,8 @@ function graph1(residual, solution)
     yg = [log10.([0.5, 0.6, 0.7, 0.8, 0.9]); log10.(gengrid([1, 10])); log10.([200])]
     xlabels = [-1,0,1]
     ylabels = [0,1,2,3]
-    @_ lfuny = ifelse(sum(_ .== ylabels) == 1, formatted(exp10(_), :SI, ndigits = 1), "")
-    @_ lfunx = ifelse(sum(_ .== ylabels) == 1, formatted(exp10(_), :SI, ndigits = 1), "")
+	lfuny(x) = ifelse(sum(x .== ylabels) == 1, formatted(exp10(x), :SI, ndigits = 1), "")
+	lfunx(x) = ifelse(sum(x .== ylabels) == 1, formatted(exp10(x), :SI, ndigits = 1), "")
     p = plot(df, x = :x, y = :y, Geom.line,
         layer(x = mL1, y = mL2, label = label, Geom.point, Geom.label),
         Scale.x_log10(labels = lfunx), 
@@ -52,7 +52,7 @@ end
 function graph2(λs, V)
     gengrid(r) = [vcat(map(x -> x:x:9x, r)...); r[end] * 10]
     xlabels = log10.([0.001, 0.01, 0.1, 1])
-    @_ lfunx = ifelse(sum(_ .== xlabels) == 1, @sprintf("%.3f", exp10(_)), "")
+	lfunx(x) = ifelse(sum(x .== xlabels) == 1, @sprintf("%.3f", exp10(x)), "")
 
     plot(x = λs, y = V, Geom.line,  
         Theme(default_color="black"),
@@ -73,8 +73,8 @@ function graph4(residual, solution)
     yg = [log10.([0.05, 0.06, 0.07, 0.08, 0.09]); log10.(gengrid([0.1, 1])); log10.([20])]
     xlabels = [-1,0,1]
     ylabels = [-1,0,1]
-    @_ lfuny = ifelse(sum(_ .== ylabels) == 1, formatted(exp10(_), :SI, ndigits = 1), "")
-    @_ lfunx = ifelse(sum(_ .== ylabels) == 1, formatted(exp10(_), :SI, ndigits = 1), "")
+	lfuny(x) = ifelse(sum(x .== ylabels) == 1, formatted(exp10(x), :SI, ndigits = 1), "")
+	lfunx(x) = ifelse(sum(x .== ylabels) == 1, formatted(exp10(x), :SI, ndigits = 1), "")
     set_default_plot_size(10cm, 8cm) 
 
     p = plot(df, x = :x, y = :y, Geom.line,
@@ -93,7 +93,7 @@ end
 function graph3(λs, V)
     gengrid(r) = [vcat(map(x -> x:x:9x, r)...); r[end] * 10]
     xlabels = log10.([0.1, 1, 10])
-    @_ lfunx = ifelse(sum(_ .== xlabels) == 1, @sprintf("%.1f", exp10(_)), "")
+	lfunx(x) = ifelse(sum(x .== xlabels) == 1, @sprintf("%.1f", exp10(x)), "")
     set_default_plot_size(10cm, 8cm) 
     plot(x = λs, y = V, Geom.line,  
         Theme(default_color="black"),
