@@ -68,35 +68,27 @@ struct RegularizationProblem
 end
 
 @doc raw"""
-    RegularizatedSolution
+    RegularizedSolution
 
-Data tpye to store the optimal solution x of the inversion. λ is the optimal λ used 
+Data type to store the optimal solution x of the inversion. λ is the optimal λ used;
 solution is the raw output from the Optim search.
-
-    x::AbstractVector
-    λ::AbstractFloat
-    solution::Optim.UnivariateOptimizationResults
 """
-struct RegularizedSolution
-    x::AbstractVector
-    λ::AbstractFloat
-    solution::Any
+struct RegularizedSolution{X<:AbstractVector, L<:AbstractFloat, S}
+    x::X
+    λ::L
+    solution::S
 end
 
 @doc raw"""
-    Domain{T1<:Any,T2<:Number,T3<:Any}
+    Domain{S<:AbstractVector, X<:AbstractVector{<:Number}, Q}
 
-Functor to map from a domain characterized by a list of setpoints [s], each 
-associated with a list of numerical values [x] to a query value q. 
-
-    s::AbstractVector{T1}
-    x::AbstractVector{T2}
-    q::T3
+Functor to map from a domain characterized by a list of setpoints [s], each
+associated with a list of numerical values [x] to a query value q.
 """
-struct Domain{T1<:Any,T2<:Number,T3<:Any}
-    s::AbstractVector{T1}
-    x::AbstractVector{T2}
-    q::T3
+struct Domain{S<:AbstractVector, X<:AbstractVector{<:Number}, Q}
+    s::S
+    x::X
+    q::Q
 end
 
 @data InverseMethod begin 

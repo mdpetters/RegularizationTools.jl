@@ -63,4 +63,9 @@ end
 @testset "type stability" begin
     @test_nowarn @inferred Γ(8, 2)
     @test_nowarn @inferred setupRegularizationProblem(rand(10, 8), 2)
+    s = range(0, stop = π, length = 8)
+    q = range(0, stop = π / 2, length = 8)
+    f(node::Domain) = sum(node.x)
+    @test_nowarn @inferred designmatrix(s, q, f)
+    @test_nowarn @inferred forwardmodel(s, collect(1.0:8.0), q, f)
 end
