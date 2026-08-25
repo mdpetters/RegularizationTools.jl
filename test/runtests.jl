@@ -16,4 +16,5 @@ using DataFrames
     include("validators.jl")     # Test validators
     include("domainfunctions.jl") 
     include("invert.jl")
+    include("edgecases.jl")      # Input validation, field correctness, edge cases
 end
