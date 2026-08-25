@@ -68,4 +68,16 @@ end
     f(node::Domain) = sum(node.x)
     @test_nowarn @inferred designmatrix(s, q, f)
     @test_nowarn @inferred forwardmodel(s, collect(1.0:8.0), q, f)
+
+    # solve-path primitives
+    A = rand(10, 6)
+    b = A * rand(6)
+    Ψ = setupRegularizationProblem(A, 2)
+    b̄ = to_standard_form(Ψ, b)
+    x̄ = solve(Ψ, b̄, 1.0)
+    @test_nowarn @inferred to_standard_form(Ψ, b)
+    @test_nowarn @inferred to_general_form(Ψ, b, x̄)
+    @test_nowarn @inferred solve(Ψ, b̄, 1.0)
+    @test_nowarn @inferred gcv_svd(Ψ, b̄, 1.0)
+    @test_nowarn @inferred gcv_tr(Ψ, b̄, 1.0)
 end
