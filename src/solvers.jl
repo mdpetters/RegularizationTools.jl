@@ -80,7 +80,8 @@ x = @>> x̄ to_general_form(Ψ, b)
 ```
 """
 function to_general_form(Ψ::RegularizationProblem, b::AbstractVector, x̄::AbstractVector) 
-	x = Ψ.L⁺ * x̄  + Ψ.K₀T⁻¹H₀ᵀ*(b - Ψ.A*Ψ.L⁺*x̄ ) 
+	x = Ψ.L⁺ₐ * x̄  + Ψ.K₀T⁻¹H₀ᵀ*(b - Ψ.A*Ψ.L⁺ₐ*x̄ ) 
+    return x
 end
 
 @doc raw"""
@@ -429,8 +430,8 @@ Example Usage
         svd(Ā),
         Iₙ,
         Iₚ,
+        L⁺,
         L⁺ₐ,
-		L⁺,
-		K₀T⁻¹H₀ᵀ	
+        K₀T⁻¹H₀ᵀ
     )
 end
