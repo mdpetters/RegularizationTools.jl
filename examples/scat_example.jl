@@ -4,8 +4,7 @@ using Underscores
 using MLStyle
 using Memoize
 using LinearAlgebra
-using Gadfly
-
+using CairoMakie
 import Lazy.@>, Lazy.@>>
 
 include("mie_functions.jl")
@@ -47,4 +46,9 @@ y = A*N
 b = A*N .+ 0.001*y .* r
 
 xλ = @> setupRegularizationProblem(A,0) solve(b, alg=:gcv_svd) getfield(:x)
-plot(x = Dp, y = xλ, Geom.line, layer(x = Dp, y = N))
+fig = Figure()
+ax = Axis(fig[1, 1], xlabel = "Dp (nm)", ylabel = "N(Dp)", title = "Estimated vs True Distribution")
+lines!(ax, Dp, N, label = "True")
+lines!(ax, Dp, xλ, label = "Estimated")
+axislegend(ax)
+fig
