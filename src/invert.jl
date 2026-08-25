@@ -130,6 +130,5 @@ function invert(A::Matrix, b::Vector, method::InverseMethod; kwargs...)
                 p.x
             end 
         end
-        _ => throw(ArgumentError("Unknown method"))
     end
 end
