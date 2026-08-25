@@ -11,6 +11,8 @@ L = Γ(m, 1)
 ```
 """
 @memoize function Γ(m::Int, order::Int)
+    order < 0 && throw(ArgumentError("order must be non-negative, got $order"))
+    order >= m && throw(ArgumentError("order must be less than m = $m, got $order"))
     if order == 0
         return Array{Float64}(LinearAlgebra.I, (m, m))
     end
@@ -410,6 +412,8 @@ Example Usage
 """
 @memoize function setupRegularizationProblem(A::AbstractMatrix, L::AbstractMatrix)
     p, n = size(L)
+    size(A, 2) == n || throw(DimensionMismatch("A must have $n columns to match L, got $(size(A, 2))"))
+    p <= n || throw(DimensionMismatch("L must have at most as many rows as columns, got $(p)×$(n)"))
     Iₙ = Matrix{Float64}(I, n, n) 
     Iₚ = Matrix{Float64}(I, p, p)
 	Q,R = qr(L')
