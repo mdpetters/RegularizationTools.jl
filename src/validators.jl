@@ -154,10 +154,10 @@ end
 gcv_svd_log10λ(Ψ::RegularizationProblem, b̄::AbstractVector, x̄₀::AbstractVector,
                log10λ::AbstractFloat) = gcv_svd(Ψ, b̄, x̄₀, 10^log10λ)
 
-function curvature_functions(x̄::Function, L1::Function, L2::Function)
-    η⁰(λ::AbstractFloat) = (log.(L2.(λ) .^ 2.0))[1]
-    ρ⁰(λ::AbstractFloat) = (log.(L1.(λ) .^ 2.0))[1]
-    ηᵖ(λ::AbstractFloat) = (derivative(η⁰, λ))[1]
+function curvature_functions(L1::Function, L2::Function)
+    η⁰(λ::AbstractFloat) = log(L2(λ)^2.0)
+    ρ⁰(λ::AbstractFloat) = log(L1(λ)^2.0)
+    ηᵖ(λ::AbstractFloat) = derivative(η⁰, λ)
 
     function κ(λ::AbstractFloat)
         nᵖ = ηᵖ(λ)
@@ -192,7 +192,7 @@ function Lcurve_functions(Ψ::RegularizationProblem, b̄::AbstractVector)
     x̄(λ::AbstractFloat)  = solve(Ψ, b̄, λ) 
     L1(λ::AbstractFloat) = norm(Ψ.Ā * x̄(λ) - b̄)
     L2(λ::AbstractFloat) = norm(Ψ.Iₚ * x̄(λ))
-    return curvature_functions(x̄, L1, L2)
+    return curvature_functions(L1, L2)
 end
 
 @doc raw"""
@@ -216,5 +216,5 @@ function Lcurve_functions(Ψ::RegularizationProblem, b̄::AbstractVector, x̄₀
     x̄(λ::AbstractFloat)  = solve(Ψ, b̄, x̄₀, λ) 
     L1(λ::AbstractFloat) = norm(Ψ.Ā * x̄(λ) - b̄)
     L2(λ::AbstractFloat) = norm(Ψ.Iₚ * (x̄(λ) - x̄₀))
-    return curvature_functions(x̄, L1, L2) 
+    return curvature_functions(L1, L2) 
 end
