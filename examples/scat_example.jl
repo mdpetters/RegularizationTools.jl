@@ -48,7 +48,7 @@ b = A*N .+ 0.001*y .* r
 xλ = @> setupRegularizationProblem(A,0) solve(b, alg=:gcv_svd) getfield(:x)
 fig = Figure()
 ax = Axis(fig[1, 1], xlabel = "Dp (nm)", ylabel = "N(Dp)", title = "Estimated vs True Distribution")
-lines!(ax, Dp, N, label = "True")
-lines!(ax, Dp, xλ, label = "Estimated")
+scatterlines!(ax, Dp, N, label = "True")
+scatterlines!(ax, Dp, xλ, label = "Estimated")
 axislegend(ax)
 fig
