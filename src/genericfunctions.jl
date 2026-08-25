@@ -23,7 +23,8 @@ shortcut ```designmatrix(s, f)``` can be used.
 function designmatrix(s::Any, q::Any, f::Function)
     n = length(s)
     x(i) = @_ map(_ == i ? 1.0 : 0.0, 1:n)
-    nodes = [Domain(s, x(i), q[j]) for i ∈ 1:n, j ∈ 1:length(q)]
+    basis = [x(i) for i ∈ 1:n]
+    nodes = [Domain(s, basis[i], q[j]) for i ∈ 1:n, j ∈ 1:length(q)]
     return @> map(f, nodes) transpose copy
 end
 
