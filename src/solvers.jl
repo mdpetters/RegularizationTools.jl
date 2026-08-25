@@ -22,7 +22,7 @@ end
 
 function zot(A::AbstractMatrix, λ::AbstractFloat)
     a = deepcopy(A)
-    n = size(A'A, 1)
+    n = size(A, 2)
     for i = 1:n
         @inbounds a[i, i] += λ
     end
