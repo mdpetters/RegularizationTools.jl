@@ -424,7 +424,6 @@ Example Usage
         A,
         L,
         Ā'Ā,
-        Ā',
         svd(Ā),
         Iₙ,
         Iₚ,
