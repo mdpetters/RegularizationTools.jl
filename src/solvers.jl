@@ -303,7 +303,7 @@ upper and lower bounds for each xᵢ.
 
 The function computes the algebraic solution using ```solve(Ψ, b; kwargs...)```, truncates the
 solution at the upper and lower bounds and uses this solution as initial condition for
-the minimization problem using a Least Squares numerical solver. The returned solution
+the minimization problem using a box-constrained optimizer. The returned solution
 is using the regularization parameter λ obtained from the algebraic solution.
 """
 function solve(
@@ -332,7 +332,7 @@ guess x₀ and upper and lower bounds for each xᵢ.
 
 The function computes the algebraic solution using ```solve(Ψ, b; kwargs...)```, truncates the
 solution at the upper and lower bounds and uses this solution as initial condition for
-the minimization problem using a Least Squares numerical solver. The returned solution
+the minimization problem using a box-constrained optimizer. The returned solution
 is using the regularization parameter λ obtained from the algebraic solution.
 """    
 function solve(
@@ -355,37 +355,28 @@ function solve_numeric(
     upper::AbstractVector
 )
     λ = xλ.λ  
-    xᵢ = xλ.x
-    xᵢ[xᵢ .< lower] .= lower[xᵢ .< lower]
-    xᵢ[xᵢ .> upper] .= upper[xᵢ .> upper]
+    xᵢ = clamp.(xλ.x, lower, upper)
     
-    LᵀL = Ψ.L'*Ψ.L
-    n = size(LᵀL,1)
+    A, L = Ψ.A, Ψ.L
     
-    function f!(out, x)
-        out[1] = norm(Ψ.A*x - b)^2.0 + λ^2.0*norm(LᵀL*x)^2.0
+    function f(x)
+        norm(A*x - b)^2.0 + λ^2.0 * norm(L*x)^2.0
     end
     
-    function g!(out, x)
-        ot = Ψ.A'*(Ψ.A*x - b) + λ^2.0*LᵀL*x
-        [out[i] = 2.0*ot[i] for i = 1:n]
+    function g!(G, x)
+        G .= 2.0 .* (A'*(A*x - b) .+ λ^2.0 .* (L'*(L*x)))
     end
     
-    LLSQ = LeastSquaresProblem(
-        x = xᵢ, 
-        f! = f!, 
-        g! = g!,
-        output_length=n
+    r = Optim.optimize(
+        f,
+        g!,
+        lower,
+        upper,
+        xᵢ,
+        Optim.Fminbox(),
+        Optim.Options(iterations = 10000),
     )
-   
-    r = optimize!(
-        LLSQ, 
-        Dogleg(LeastSquaresOptim.QR()), 
-        lower = lower, 
-        upper = upper,
-        x_tol=1e-10
-    ) 
-    return return RegularizedSolution(r.minimizer, λ, r)
+    return RegularizedSolution(Optim.minimizer(r), λ, r)
 end
 
 

@@ -43,7 +43,7 @@ inrange(x, y, δ) = ifelse((x < y + δ) & (x > y - δ), true, false)
 xλ = invert(A, b, Lₖ(2); alg = :gcv_svd, λ₁ = 0.1)
 @test inrange(sum(xλ), 85.0, 2.0) == true
 xλ = invert(A, b, LₖB(2,lb,ub); alg = :L_curve, λ₁ = 0.1)
-@test inrange(sum(xλ), 145.0, 2.0) == true
+@test inrange(sum(xλ), 106.7, 2.0) == true
 xλ = invert(A, b, Lₖx₀(2, x₀); alg = :L_curve, λ₁ = 0.1)
 @test inrange(sum(xλ), 76.0, 2.0) == true
 xλ = invert(A, b, Lₖx₀(2, x₀); alg = :gcv_tr)
@@ -51,12 +51,12 @@ xλ = invert(A, b, Lₖx₀(2, x₀); alg = :gcv_tr)
 xλ = invert(A, b, Lₖx₀(2, x₀); alg = :gcv_svd)
 @test inrange(sum(xλ), 85.0, 2.0) == true
 xλ = invert(A, b, Lₖx₀B(2,x₀,lb,ub); alg = :gcv_svd)
-@test inrange(sum(xλ), 137.0, 2.0) == true
+@test inrange(sum(xλ), 106.8, 2.0) == true
 xλ = invert(A, b, LₖDₓ(2, ε); alg = :gcv_svd)
 @test inrange(sum(xλ), 87.0, 2.0) == true
 xλ = invert(A, b, LₖDₓB(2, ε, lb, ub); alg = :gcv_svd)
-@test inrange(sum(xλ), 135.0, 2.0) == true
+@test inrange(sum(xλ), 106.7, 2.0) == true
 xλ = invert(A, b, Lₖx₀Dₓ(2,x₀, ε); alg = :gcv_svd)
 @test inrange(sum(xλ), 87.0, 2.0) == true
 xλ = invert(A, b, Lₖx₀DₓB(2, x₀, ε, lb, ub); alg = :gcv_svd)
-@test inrange(sum(xλ), 135.0, 2.0) == true
+@test inrange(sum(xλ), 106.7, 2.0) == true

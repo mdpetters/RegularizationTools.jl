@@ -6,7 +6,6 @@ using Underscores
 using LinearAlgebra
 using Calculus
 using Optim
-using LeastSquaresOptim
 import Lazy.@>, Lazy.@>>, Lazy.@as
 
 export setupRegularizationProblem,
