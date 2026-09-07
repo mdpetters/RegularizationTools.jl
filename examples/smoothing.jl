@@ -4,7 +4,7 @@ import RegularizationTools
 const RT = RegularizationTools
 import LinearAlgebra
 const LA = LinearAlgebra
-using PyPlot
+using CairoMakie
 
 # create simulated data
 npts = 100
@@ -35,9 +35,11 @@ D = deriv_matrix(d, npts)
 δ = LA.tr(D'D)/npts^(d+2)
 yhatd = (LA.I + λ/δ*D'D)\y
 
-figure(1)
-clf()
-plot(x, y, "o", mfc="None")
-plot(x, yhat, label="Regularization tools")
-plot(x, yhatd, label="Direct method")
-legend(loc="best")
+
+fig = Figure()
+ax = Axis(fig[1, 1], xlabel="x", ylabel="y")
+scatter!(ax, x, y, label="data", color=:white, strokecolor=:black, strokewidth=1)
+lines!(ax, x, yhat, label="Regularization tools")
+lines!(ax, x, yhatd, label="Direct method")
+axislegend(ax)
+fig

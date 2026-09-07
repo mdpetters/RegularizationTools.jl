@@ -61,75 +61,74 @@ function invert(A::Matrix, b::Vector, method::InverseMethod; kwargs...)
         Lₖ(k) => @as p begin
             setupRegularizationProblem(A, k)
             solve(p, b; kwargs...)    
-            getfield(p, :x)
+            p.x
         end
         Lₖx₀(k, x₀) => @as p begin
             setupRegularizationProblem(A, k)
             solve(p, b, x₀; kwargs...)      
-            getfield(p, :x)
+            p.x
         end
         LₖB(k, lb, ub)  => @as p begin
             setupRegularizationProblem(A, k)
             solve(p, b, lb, ub; kwargs...)     
-            getfield(p, :x)
+            p.x
         end
         Lₖx₀B(k, x₀, lb, ub) => @as p begin
             setupRegularizationProblem(A, k)
             solve(p, b, x₀, lb, ub; kwargs...) 
-            getfield(p, :x)
+            p.x
         end
         LₖDₓ(k, ε) => begin
             x̂ = @as p begin
                 setupRegularizationProblem(A, k)
                 solve(p, b; kwargs...) 
-                getfield(p, :x)
+                p.x
             end 
             x̂[x̂ .< ε] .= ε 
             ψ = @>> Γ(m, k)*Diagonal(x̂)^(-1) setupRegularizationProblem(A)
             @as p begin
                 solve(ψ, b; kwargs...) 
-                getfield(p, :x)
+                p.x
             end
         end
         LₖDₓB(k, ε, lb, ub) => begin
             x̂ = @as p begin
                 setupRegularizationProblem(A, k)
                 solve(p, b; kwargs...) 
-                getfield(p, :x)
+                p.x
             end 
             x̂[x̂ .< ε] .= ε
             ψ = @>> Γ(m, k)*Diagonal(x̂)^(-1) setupRegularizationProblem(A)
             @as p begin
                 solve(ψ, b, x̂, lb, ub; kwargs...) 
-                getfield(p, :x)
+                p.x
             end 
         end
         Lₖx₀Dₓ(k, x₀, ε) => begin
             x̂ = @as p begin
                 setupRegularizationProblem(A, k)
                 solve(p, b, x₀; kwargs...) 
-                getfield(p, :x)
+                p.x
             end 
             x̂[x̂ .< ε] .= ε
             ψ = @>> Γ(m, k)*Diagonal(x̂)^(-1) setupRegularizationProblem(A)
             @as p begin
                 solve(ψ, b; kwargs...) 
-                getfield(p, :x)
+                p.x
             end 
         end
         Lₖx₀DₓB(k, x₀, ε, lb, ub) => begin
             x̂ = @as p begin
                 setupRegularizationProblem(A, k)
                 solve(p, b, x₀; kwargs...) 
-                getfield(p, :x)
+                p.x
             end 
             x̂[x̂ .< ε] .= ε
             ψ = @>> Γ(m, k)*Diagonal(x̂)^(-1) setupRegularizationProblem(A)
             @as p begin
                 solve(ψ, b, x̂, lb, ub; kwargs...) 
-                getfield(p, :x)
+                p.x
             end 
         end
-        _ => throw("Unknown Method")
     end
 end

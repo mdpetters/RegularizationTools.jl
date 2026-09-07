@@ -20,10 +20,11 @@ y = \mathbf{A}x
 where x is an array of numerical input values. In the case that [q] = [s], the 
 shortcut ```designmatrix(s, f)``` can be used.
 """
-function designmatrix(s::Any, q::Any, f::Function)::AbstractMatrix
+function designmatrix(s::Any, q::Any, f::Function)
     n = length(s)
     x(i) = @_ map(_ == i ? 1.0 : 0.0, 1:n)
-    nodes = [Domain(s, x(i), q[j]) for i ∈ 1:n, j ∈ 1:length(q)]
+    basis = [x(i) for i ∈ 1:n]
+    nodes = [Domain(s, basis[i], q[j]) for i ∈ 1:n, j ∈ 1:length(q)]
     return @> map(f, nodes) transpose copy
 end
 
@@ -56,6 +57,6 @@ function forwardmodel(
     x::AbstractVector{T2},
     q::AbstractVector{T3},
     f::Function,
-)::AbstractArray where {T1<:Any,T2<:Number,T3<:Any}
+) where {T1<:Any,T2<:Number,T3<:Any}
     return @>> (@_ map(Domain(s, x, _), q)) map(f)
 end

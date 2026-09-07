@@ -11,6 +11,8 @@ L = Γ(m, 1)
 ```
 """
 @memoize function Γ(m::Int, order::Int)
+    order < 0 && throw(ArgumentError("order must be non-negative, got $order"))
+    order >= m && throw(ArgumentError("order must be less than m = $m, got $order"))
     if order == 0
         return Array{Float64}(LinearAlgebra.I, (m, m))
     end
@@ -20,7 +22,7 @@ end
 
 function zot(A::AbstractMatrix, λ::AbstractFloat)
     a = deepcopy(A)
-    n = size(A'A, 1)
+    n = size(A, 2)
     for i = 1:n
         @inbounds a[i, i] += λ
     end
@@ -80,7 +82,8 @@ x = @>> x̄ to_general_form(Ψ, b)
 ```
 """
 function to_general_form(Ψ::RegularizationProblem, b::AbstractVector, x̄::AbstractVector) 
-	x = Ψ.L⁺ * x̄  + Ψ.K₀T⁻¹H₀ᵀ*(b - Ψ.A*Ψ.L⁺*x̄ ) 
+	x = Ψ.L⁺ₐ * x̄  + Ψ.K₀T⁻¹H₀ᵀ*(b - Ψ.A*Ψ.L⁺ₐ*x̄ ) 
+    return x
 end
 
 @doc raw"""
@@ -111,11 +114,8 @@ x̄ = solve(A, b̄, 0.5)                     # Solve the equation
 x = @>> x̄ to_general_form(Ψ, b)          # Convert back to general form
 ```
 """
-solve(Ψ::RegularizationProblem, b̄::AbstractVector, λ::AbstractFloat) = try
-    cholesky!(Hermitian(zot(Ψ.ĀĀ, λ^2.0))) \ (Ψ.Ā' * b̄)
-catch
-     zot(Ψ.ĀĀ, λ^2.0) \ (Ψ.Ā' * b̄)
-end
+solve(Ψ::RegularizationProblem, b̄::AbstractVector, λ::AbstractFloat) =
+    cholesky!(zot(Ψ.ĀĀ, λ^2.0)) \ (Ψ.Ā' * b̄)
 
 @doc raw"""
     solve(Ψ::RegularizationProblem, b̄::AbstractVector, x̄₀::AbstractVector, λ::AbstractFloat)
@@ -137,11 +137,8 @@ x̄ = solve(A, b̄, x̄₀, 0.5)                 # Solve the equation
 x = to_general_form(Ψ, b, x̄)             # Convert back to general form
 ```
 """
-solve(Ψ::RegularizationProblem, b̄::AbstractVector, x̄₀::AbstractVector, λ::AbstractFloat) = try
-    cholesky!(Hermitian(zot(Ψ.ĀĀ, λ^2.0))) \ (Ψ.Ā' * b̄ + λ^2.0 * x̄₀)
-catch
-    zot(Ψ.ĀĀ, λ^2.0) \ (Ψ.Ā' * b̄ + λ^2.0 * x̄₀)
-end
+solve(Ψ::RegularizationProblem, b̄::AbstractVector, x̄₀::AbstractVector, λ::AbstractFloat) =
+    cholesky!(zot(Ψ.ĀĀ, λ^2.0)) \ (Ψ.Ā' * b̄ + λ^2.0 * x̄₀)
 
 @doc raw"""
     function solve(
@@ -303,7 +300,7 @@ upper and lower bounds for each xᵢ.
 
 The function computes the algebraic solution using ```solve(Ψ, b; kwargs...)```, truncates the
 solution at the upper and lower bounds and uses this solution as initial condition for
-the minimization problem using a Least Squares numerical solver. The returned solution
+the minimization problem using a box-constrained optimizer. The returned solution
 is using the regularization parameter λ obtained from the algebraic solution.
 """
 function solve(
@@ -332,7 +329,7 @@ guess x₀ and upper and lower bounds for each xᵢ.
 
 The function computes the algebraic solution using ```solve(Ψ, b; kwargs...)```, truncates the
 solution at the upper and lower bounds and uses this solution as initial condition for
-the minimization problem using a Least Squares numerical solver. The returned solution
+the minimization problem using a box-constrained optimizer. The returned solution
 is using the regularization parameter λ obtained from the algebraic solution.
 """    
 function solve(
@@ -355,37 +352,28 @@ function solve_numeric(
     upper::AbstractVector
 )
     λ = xλ.λ  
-    xᵢ = xλ.x
-    xᵢ[xᵢ .< lower] .= lower[xᵢ .< lower]
-    xᵢ[xᵢ .> upper] .= upper[xᵢ .> upper]
+    xᵢ = clamp.(xλ.x, lower, upper)
     
-    LᵀL = Ψ.L'*Ψ.L
-    n = size(LᵀL,1)
+    A, L = Ψ.A, Ψ.L
     
-    function f!(out, x)
-        out[1] = norm(Ψ.A*x - b)^2.0 + λ^2.0*norm(LᵀL*x)^2.0
+    function f(x)
+        norm(A*x - b)^2.0 + λ^2.0 * norm(L*x)^2.0
     end
     
-    function g!(out, x)
-        ot = Ψ.A'*(Ψ.A*x - b) + λ^2.0*LᵀL*x
-        [out[i] = 2.0*ot[i] for i = 1:n]
+    function g!(G, x)
+        G .= 2.0 .* (A'*(A*x - b) .+ λ^2.0 .* (L'*(L*x)))
     end
     
-    LLSQ = LeastSquaresProblem(
-        x = xᵢ, 
-        f! = f!, 
-        g! = g!,
-        output_length=n
+    r = Optim.optimize(
+        f,
+        g!,
+        lower,
+        upper,
+        xᵢ,
+        Optim.Fminbox(),
+        Optim.Options(iterations = 10000),
     )
-   
-    r = optimize!(
-        LLSQ, 
-        Dogleg(LeastSquaresOptim.QR()), 
-        lower = lower, 
-        upper = upper,
-        x_tol=1e-10
-    ) 
-    return return RegularizedSolution(r.minimizer, λ, r)
+    return RegularizedSolution(Optim.minimizer(r), λ, r)
 end
 
 
@@ -418,6 +406,8 @@ Example Usage
 """
 @memoize function setupRegularizationProblem(A::AbstractMatrix, L::AbstractMatrix)
     p, n = size(L)
+    size(A, 2) == n || throw(DimensionMismatch("A must have $n columns to match L, got $(size(A, 2))"))
+    p <= n || throw(DimensionMismatch("L must have at most as many rows as columns, got $(p)×$(n)"))
     Iₙ = Matrix{Float64}(I, n, n) 
     Iₚ = Matrix{Float64}(I, p, p)
 	Q,R = qr(L')
@@ -434,12 +424,11 @@ Example Usage
         A,
         L,
         Ā'Ā,
-        Ā',
         svd(Ā),
         Iₙ,
         Iₚ,
+        L⁺,
         L⁺ₐ,
-		L⁺,
-		K₀T⁻¹H₀ᵀ	
+        K₀T⁻¹H₀ᵀ
     )
 end
